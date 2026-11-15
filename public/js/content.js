@@ -12,6 +12,8 @@ window.CONTENT = {
 
   icons: [
     ['microscope', 'מיקרוסקופ'], ['tube', 'מבחנה'], ['dna', 'סליל DNA'], ['yeast', 'שמר'],
+    ['flask', 'ארלנמייר'], ['petri', 'צלחת פטרי'], ['magnifier', 'זכוכית מגדלת'], ['atom', 'אטום'],
+    ['bacteria', 'חיידק'], ['pipette', 'פיפטה'], ['drop', 'טיפת חלב'], ['molecule', 'מולקולה'],
   ],
 
   chat: [

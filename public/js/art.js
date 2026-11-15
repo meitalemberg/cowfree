@@ -50,7 +50,16 @@
     tube: ['מבחנה', `<g transform="rotate(20 24 24)"><path d="M18 8v26a6 6 0 0 0 12 0V8" fill="${M}" ${O}/><path d="M18 22h12v12a6 6 0 0 1-12 0z" fill="${T}"/><path d="M18 8v26a6 6 0 0 0 12 0V8" fill="none" ${O}/><path d="M15 8h18" ${o(3)}/><circle cx="24" cy="17" r="1.8" fill="${T}"/></g>`],
     dna: ['סליל DNA', `<path d="M17 12h14M19 19h10M19 29h10M17 36h14" stroke="${N}" stroke-width="2" opacity=".45" stroke-linecap="round"/><path d="M15 6c0 9 18 9 18 18S15 33 15 42" fill="none" stroke="${T}" stroke-width="3.5" stroke-linecap="round"/><path d="M33 6c0 9-18 9-18 18s18 9 18 18" fill="none" stroke="${N}" stroke-width="3.5" stroke-linecap="round"/>`],
     yeast: ['תא שמר', yeast(21, 29, 1.05)],
+    flask: ['ארלנמייר', `<path d="M20 6v12L9 38a3 3 0 0 0 3 4h24a3 3 0 0 0 3-4L28 18V6" fill="${M}"/><path d="M14.500 30h19l4.600 8.400a2 2 0 0 1-1.800 2.600H11.700a2 2 0 0 1-1.800-2.600z" fill="${T}"/><path d="M20 6v12L9 38a3 3 0 0 0 3 4h24a3 3 0 0 0 3-4L28 18V6" fill="none" ${O}/><path d="M17 6h14" ${o(3)}/><circle cx="21" cy="35" r="1.800" fill="${M}"/><circle cx="27" cy="32" r="1.300" fill="${M}"/>`],
+    petri: ['צלחת פטרי', `<ellipse cx="24" cy="29" rx="19" ry="10" fill="${M}" ${O}/><ellipse cx="24" cy="28" rx="14.500" ry="6.500" fill="${P}"/><circle cx="18" cy="27" r="2.600" fill="${T}"/><circle cx="27" cy="30" r="2" fill="${A}"/><circle cx="30" cy="25.500" r="1.600" fill="${T}"/><circle cx="22" cy="31" r="1.300" fill="${N}" opacity=".6"/><path d="M5 25c0-6.500 8.500-11.500 19-11.500S43 18.500 43 25" fill="none" ${O} opacity=".45"/>`],
+    magnifier: ['זכוכית מגדלת', `<path d="M29.500 29.500L40 40" stroke="${N}" stroke-width="6.500" stroke-linecap="round"/><circle cx="20" cy="20" r="12.500" fill="${M}" ${O}/><circle cx="20" cy="20" r="9" fill="${T}" opacity=".28"/><path d="M14 16.500a7 7 0 0 1 5-4.500" fill="none" stroke="${M}" stroke-width="2.500" stroke-linecap="round"/>`],
+    atom: ['אטום', `<ellipse cx="24" cy="24" rx="19" ry="7.500" fill="none" stroke="${T}" stroke-width="3"/><ellipse cx="24" cy="24" rx="19" ry="7.500" fill="none" stroke="${N}" stroke-width="3" transform="rotate(60 24 24)"/><ellipse cx="24" cy="24" rx="19" ry="7.500" fill="none" stroke="${T}" stroke-width="3" transform="rotate(-60 24 24)"/><circle cx="24" cy="24" r="4.500" fill="${A}" ${o(2)}/>`],
+    bacteria: ['חיידק', `<path d="M37 17c3-3 5 1 8-1M38 31c3 2 4-2 7 0" fill="none" ${o(2)}/><rect x="6" y="15" width="32" height="18" rx="9" fill="${P}" ${O} transform="rotate(-12 22 24)"/><circle cx="16" cy="25" r="2.600" fill="${T}"/><circle cx="24" cy="21.500" r="2" fill="${T}" opacity=".7"/><circle cx="29" cy="24.500" r="1.600" fill="${N}" opacity=".55"/>`],
+    pipette: ['פיפטה', `<g transform="rotate(30 24 24)"><path d="M22 19h4v19l-2 5-2-5z" fill="${M}" ${O}/><path d="M22.400 30h3.200v8l-1.600 4-1.600-4z" fill="${T}"/><rect x="18.500" y="15" width="11" height="5" rx="1.800" fill="${N}"/><path d="M20 15c-3-10 11-10 8 0z" fill="${T}" ${O}/></g>`],
+    drop: ['טיפת חלב', `<path d="M24 5S11 20 11 29a13 13 0 0 0 26 0C37 20 24 5 24 5z" fill="${M}" ${O}/><path d="M17.500 29.500a7 7 0 0 0 5 6.500" fill="none" stroke="${T}" stroke-width="3" stroke-linecap="round"/>`],
+    molecule: ['מולקולה', `<path d="M24 24L11 13M24 24l13-10M24 24L13 37M24 24l12 11" ${o(2.500)}/><circle cx="11" cy="13" r="5.500" fill="${T}" ${o(2)}/><circle cx="37" cy="14" r="5" fill="${A}" ${o(2)}/><circle cx="13" cy="37" r="5" fill="${P}" ${o(2)}/><circle cx="36" cy="35" r="4.500" fill="${R}" ${o(2)}/><circle cx="24" cy="24" r="6.500" fill="${N}"/>`],
   };
+  const hasIcon = k => Object.prototype.hasOwnProperty.call(icons, k);
   const icon = k => svg(icons[k][0], '0 0 48 48', icons[k][1], 'ico');
 
   /* ---------- אווטארים (בלי תווי פנים) ---------- */
@@ -194,5 +203,5 @@
      <defs><linearGradient id="scanfade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${T}" stop-opacity="0"/><stop offset="1" stop-color="${T}" stop-opacity=".28"/></linearGradient></defs>
      <g font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="${T}"><text x="20" y="146" direction="ltr">SAMPLE 0418</text><text x="200" y="146" text-anchor="end" direction="ltr">SCANNING</text></g>`, 'heroscan');
 
-  window.ART = { icon, avatar, drink, cup, lock, stop, flag, brief1, pipeline, step, line, gelAnim, folder, schnitzel, beadCols, ui, heroScan };
+  window.ART = { icon, hasIcon, avatar, drink, cup, lock, stop, flag, brief1, pipeline, step, line, gelAnim, folder, schnitzel, beadCols, ui, heroScan };
 })();

@@ -118,7 +118,7 @@
     if (tab === 'lobby') {
       if (!$('#qr')) { main.innerHTML = lobbyHtml(); drawQr(); }
       $('#joined').innerHTML = list.length
-        ? list.map(t => `<span class="tchip">${ART.icon(t.icon in { microscope: 1, tube: 1, dna: 1, yeast: 1 } ? t.icon : 'tube')}${esc(t.name)}</span>`).join('')
+        ? list.map(t => `<span class="tchip">${ART.icon(ART.hasIcon(t.icon) ? t.icon : 'tube')}${esc(t.name)}</span>`).join('')
         : '<span class="empty">עוד אין צוותים. מחכים לסריקה הראשונה…</span>';
     } else {
       // מציירים מחדש רק כשהנתונים השתנו, כדי לא לשבור בחירת טקסט וגלילה
@@ -153,7 +153,7 @@
       ${list.map(t => {
         const stuck = isStuck(t), gone = st.now - t.lastSeen > 12000;
         return `<tr class="${stuck ? 'stuck' : ''} ${gone ? 'gone' : ''}">
-          <th scope="row"><span class="tname">${ART.icon(t.icon in { microscope: 1, tube: 1, dna: 1, yeast: 1 } ? t.icon : 'tube')}${esc(t.name)}</span>${gone ? '<small class="badge">מנותק</small>' : ''}</th>
+          <th scope="row"><span class="tname">${ART.icon(ART.hasIcon(t.icon) ? t.icon : 'tube')}${esc(t.name)}</span>${gone ? '<small class="badge">מנותק</small>' : ''}</th>
           <td>${teamStatus(t)}${stuck ? ` <small class="badge amber">⚠ תקוע ${Math.floor((st.now - t.stationSince) / 60000)} דק׳</small>` : ''}</td>
           <td><span class="pips">${[0, 1, 2, 3].map(i => `<i class="${t.solved[i] ? 'done' : ''}">${t.solved[i] ? '✓' : i + 1}</i>`).join('')}</span></td>
           <td class="mono" dir="ltr">${t.station ? mmss(t.elapsed) : '–'}</td><td class="num">${t.hints}</td><td class="num">${t.wrong}</td>
@@ -167,7 +167,7 @@
     if (!list.length) return '<p class="empty big">התשובות יופיעו כאן כשצוותים יתחילו לכתוב.</p>';
     return `<div class="wall">${list.map(t => {
       const v = t.verdict;
-      return `<article class="wcard"><h2>${ART.icon(t.icon in { microscope: 1, tube: 1, dna: 1, yeast: 1 } ? t.icon : 'tube')}${esc(t.name)}</h2>
+      return `<article class="wcard"><h2>${ART.icon(ART.hasIcon(t.icon) ? t.icon : 'tube')}${esc(t.name)}</h2>
         <h3>משפטי גשר</h3><ol class="bridges">${[0, 1, 2, 3].map(i => `<li>${t.bridges[i] ? esc(t.bridges[i]) : '<i class="empty">עוד לא נכתב</i>'}</li>`).join('')}</ol>
         <h3>פסק הדין</h3>${v.sent ? `<div class="vmini"><p><b>בית הקפה ${esc(v.cafe)}</b>, כי ${esc(v.cafeWhy)}</p><p><b>אמא של נועה ${esc(v.mom)}</b>, כי ${esc(v.momWhy)}</p><p><b>בתפריט:</b> ${esc(v.menu)}</p></div>
           <button class="tb small" data-show="${esc(t.id)}">הצגה במסך מלא</button>` : '<p><i class="empty">עוד לא נשלח</i></p>'}
