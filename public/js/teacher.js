@@ -168,7 +168,6 @@
     return `<div class="wall">${list.map(t => {
       const v = t.verdict;
       return `<article class="wcard"><h2>${ART.icon(ART.hasIcon(t.icon) ? t.icon : 'tube')}${esc(t.name)}</h2>
-        <h3>משפטי גשר</h3><ol class="bridges">${[0, 1, 2, 3].map(i => `<li>${t.bridges[i] ? esc(t.bridges[i]) : '<i class="empty">עוד לא נכתב</i>'}</li>`).join('')}</ol>
         <h3>פסק הדין</h3>${v.sent ? `<div class="vmini"><p><b>בית הקפה ${esc(v.cafe)}</b>, כי ${esc(v.cafeWhy)}</p><p><b>אמא של נועה ${esc(v.mom)}</b>, כי ${esc(v.momWhy)}</p><p><b>בתפריט:</b> ${esc(v.menu)}</p></div>
           <button class="tb small" data-show="${esc(t.id)}">הצגה במסך מלא</button>` : '<p><i class="empty">עוד לא נשלח</i></p>'}
         ${t.exitSent ? `<h3>כרטיס יציאה</h3><p>${esc(t.exitAnswer)}</p>` : ''}</article>`;
@@ -300,8 +299,8 @@
   /* ================= CSV ================= */
   function csv() {
     if (!st) return;
-    const head = ['צוות', 'סמל', 'מצב', 'ראיות שפוענחו', 'זמן (שניות, כולל קנסות)', 'רמזים', 'קודים שגויים', 'גשר 1', 'גשר 2', 'גשר 3', 'גשר 4', 'בית הקפה', 'בית הקפה: כי', 'אמא של נועה', 'אמא: כי', 'מה לכתוב בתפריט', 'הצבעה', 'כרטיס יציאה'];
-    const rows = teams().map(t => [t.name, t.icon, teamStatus(t), t.solved.filter(Boolean).length, t.elapsed, t.hints, t.wrong, ...[0, 1, 2, 3].map(i => t.bridges[i] || ''), t.verdict.cafe, t.verdict.cafeWhy, t.verdict.mom, t.verdict.momWhy, t.verdict.menu, t.vote, t.exitAnswer]);
+    const head = ['צוות', 'סמל', 'מצב', 'ראיות שפוענחו', 'זמן (שניות, כולל קנסות)', 'רמזים', 'קודים שגויים', 'בית הקפה', 'בית הקפה: כי', 'אמא של נועה', 'אמא: כי', 'מה לכתוב בתפריט', 'הצבעה', 'כרטיס יציאה'];
+    const rows = teams().map(t => [t.name, t.icon, teamStatus(t), t.solved.filter(Boolean).length, t.elapsed, t.hints, t.wrong, t.verdict.cafe, t.verdict.cafeWhy, t.verdict.mom, t.verdict.momWhy, t.verdict.menu, t.vote, t.exitAnswer]);
     // גרש בתחילת תא שמתחיל ב-= + - @ מונע מאקסל לפרש תשובת תלמיד כנוסחה
     const cell = v => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
     const blob = new Blob(['﻿' + [head, ...rows].map(r => r.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });

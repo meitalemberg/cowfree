@@ -15,7 +15,7 @@
 
   /* ================= מצב ================= */
   const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(9)), b => b.toString(36).padStart(2, '0')).join('');
-  const newStation = () => ({ solved: false, skipped: false, hints: [false, false], freeHint: false, wrong: 0, bridge: '', codeText: '', briefSeen: false, data: {} });
+  const newStation = () => ({ solved: false, skipped: false, hints: [false, false], freeHint: false, wrong: 0, codeText: '', briefSeen: false, data: {} });
   const fresh = () => ({
     v: 1, teamId: rid(), code: '', prefill: '', epoch: 0, name: '', icon: '', screen: 'join', st: 1, phase: 'brief',
     timer: { startedAt: 0, pausedMs: 0, pauseStart: 0, finishedAt: 0 }, penalties: 0,
@@ -107,7 +107,6 @@
   const stamp = (text, cls = '') => `<div class="stamp ${cls}"><span>${esc(text)}</span></div>`;
   const chalk = inner => `<div class="chalk">${inner}</div>`;
   const menuSign = () => chalk(`<span class="chalk-new">${esc(C.menuSign[0])}</span><span class="chalk-line">${esc(C.menuSign[1])}</span>${ART.cup}`);
-  const fullBridge = n => { const b = (S.stations[n].bridge || '').trim(); return n === 1 && b ? C.stations[1].bridgePrefix + ' ' + b : b; };
   const curStation = () => { for (let n = 1; n <= 4; n++) if (!S.stations[n].solved) return n; return 5; };
 
   /* ================= כותרת ומד התקדמות ================= */
@@ -166,7 +165,6 @@
       wrong: [1, 2, 3, 4].reduce((a, n) => a + S.stations[n].wrong, 0),
       elapsed: Math.round((elapsedMs() + S.penalties * 60000) / 1000),
       running: started() && !S.timer.finishedAt,
-      bridges: [1, 2, 3, 4].map(fullBridge),
       verdict: S.verdict.sent ? S.verdict : { sent: false },
       vote: S.vote, exitAnswer: S.exitSent ? S.exitAnswer : '', exitSent: S.exitSent,
     };
@@ -225,6 +223,8 @@
   }
 
   /* ================= ניווט ================= */
+  const backBtn = label => `<button class="iconbtn back" id="back" aria-label="${label}">${ART.ui.back}</button>`;
+  const backRow = label => `<div class="backrow">${backBtn(label)}<span aria-hidden="true">חזרה</span></div>`;
   function go(screen, patch) {
     S.screen = screen; Object.assign(S, patch || {});
     save(); render(); window.scrollTo(0, 0);
@@ -321,12 +321,13 @@
   /* ================= 3. המחלוקת ================= */
   function disputeScreen() {
     const d = C.dispute;
-    app.innerHTML = `<section class="screen dispute">
+    app.innerHTML = `<section class="screen dispute">${backRow('חזרה לשיחה')}
       <article class="card review"><header>${ART.avatar('mom')}<div><b>אמא של נועה</b><div class="stars" role="img" aria-label="כוכב אחד מתוך חמישה">${[1, 0, 0, 0, 0].map(on => on ? ART.ui.star.replace('ui star', 'ui star on') : ART.ui.star).join('')}</div></div></header><p>${esc(d.review)}</p></article>
       <article class="card review reply"><header><div class="biz" aria-hidden="true">${ART.cup}</div><div><b>תגובת בעל העסק</b><small>בית הקפה</small></div></header><p>${esc(d.reply)}</p></article>
       <h1 class="whois">מי צודק?</h1>
       <button class="btn" id="next">המשך${ART.ui.next}</button></section>`;
     $('#next').onclick = () => go('letter');
+    $('#back').onclick = () => go('chat');
   }
 
   /* ================= 4. מכתב המשימה ================= */
@@ -338,7 +339,7 @@
   }
   function letterScreen() {
     const L = C.letter;
-    app.innerHTML = `<section class="screen letter">
+    app.innerHTML = `<section class="screen letter">${backRow('חזרה למחלוקת')}
       <div class="envelope"><div class="env-flap-open" aria-hidden="true"></div>
         <article class="paper sheet-in">${stamp('תיק חקירה מס׳ 0418', 'red tilt corner')}
           <p class="to"><b>אל:</b> צוות ${esc(S.name)}, המעבדה לבטיחות מזון</p>
@@ -353,6 +354,7 @@
       if (!started()) { S.timer.startedAt = Date.now(); if (S.net.paused) S.timer.pauseStart = Date.now(); }
       sfx('lock'); go('board');
     };
+    $('#back').onclick = () => go('dispute');
   }
 
   /* ================= 5. לוח הראיות ================= */
@@ -373,27 +375,29 @@
     if (just) { S.justUnlocked = 0; saveLocal(); }
     $$('.env.open').forEach(b => b.onclick = () => {
       const n = +b.dataset.n, st = S.stations[n];
-      go('station', { st: n, phase: n !== 3 && !st.briefSeen ? 'brief' : 'task' });
+      go('station', { st: n, phase: hasBrief(n) && !st.briefSeen ? 'brief' : 'task' });
     });
     const v = $('#to-verdict'); if (v) v.onclick = () => go('verdict');
   }
 
   /* ================= 6. עמדות ================= */
-  const STEPS = [['brief', 'תדריך'], ['task', 'משימה'], ['bridge', 'משפט גשר'], ['code', 'קוד']];
+  const STEPS = [['brief', 'תדריך'], ['task', 'משימה'], ['code', 'קוד']];
+  const hasBrief = n => n !== 3;
   // שלבי העמדה. cur הוא השלב הנוכחי; כל מה שלפניו מסומן כהושלם
   const stepsHtml = (n, cur) => {
-    const list = STEPS.filter(([k]) => n !== 3 || k !== 'brief'), at = list.findIndex(([k]) => k === cur);
+    const list = STEPS.filter(([k]) => hasBrief(n) || k !== 'brief'), at = list.findIndex(([k]) => k === cur);
     return `<ol class="steps" id="steps" aria-label="שלבי העמדה">${list.map(([k, l], i) => `<li data-k="${k}" class="${i < at ? 'done' : i === at ? 'cur' : ''}" ${i === at ? 'aria-current="step"' : ''}>${l}</li>`).join('')}</ol>`;
   };
   const setStep = (n, cur) => { const el = $('#steps'); if (el) el.outerHTML = stepsHtml(n, cur); };
-  const stHead = (n, cur) => `<div class="st-head"><button class="iconbtn back" id="back" aria-label="חזרה ללוח הראיות">${ART.ui.back}</button><div><span class="tagnum">ראיה ${n}</span><h1>${esc(C.stations[n].title)}</h1></div></div>${cur ? stepsHtml(n, cur) : ''}`;
+  const stHead = (n, cur) => `<div class="st-head">${backBtn(cur !== 'brief' && hasBrief(n) ? 'חזרה לתדריך' : 'חזרה ללוח הראיות')}<div><span class="tagnum">ראיה ${n}</span><h1>${esc(C.stations[n].title)}</h1></div></div>${cur ? stepsHtml(n, cur) : ''}`;
   function stationScreen() {
     const n = S.st, st = S.stations[n];
     if (st.solved && S.phase !== 'success') return go('board');
     if (S.phase === 'success') successScreen(n);
     else if (S.phase === 'brief') briefScreen(n);
     else taskScreen(n);
-    const back = $('#back'); if (back) back.onclick = () => go('board');
+    const back = $('#back');
+    if (back) back.onclick = () => S.phase === 'task' && hasBrief(n) ? go('station', { phase: 'brief' }) : go('board');
   }
 
   /* ----- תדריך ----- */
@@ -428,13 +432,6 @@
   }
 
   /* ----- שלד משימה: גשר, מנעול, רמזים ----- */
-  function bridgeBlock(n) {
-    const D = C.stations[n], st = S.stations[n];
-    return `<div class="card bridge"><h2>${ART.ui.pen}משפט גשר</h2><p class="bq">${esc(D.bridge)}</p>
-      ${n === 1 ? `<p class="prefix">${esc(D.bridgePrefix)}…</p>` : ''}
-      <textarea id="bridge" rows="3" maxlength="500" placeholder="כתבו כאן…" aria-label="${esc(n === 1 ? D.bridgePrefix : D.bridge)}">${esc(st.bridge)}</textarea>
-      <p class="need" id="need" aria-live="polite"></p></div>`;
-  }
   function lockBlock(n) {
     const D = C.stations[n];
     let field = '';
@@ -444,7 +441,7 @@
     if (n === 4) field = `<div class="pair" dir="ltr"><label><input id="c1" class="code mono" inputmode="numeric" maxlength="2" autocomplete="off"><span dir="rtl">פסים בחלב פרה</span></label><b class="dash">–</b><label><input id="c2" class="code mono" inputmode="numeric" maxlength="2" autocomplete="off"><span dir="rtl">פסים בחלב ללא פרה</span></label></div>`;
     return `<div class="card codebox" id="codebox"><h2><span id="lock-ico">${ART.ui.lock}</span>מנעול הקוד</h2>${field}
       <p class="err" id="err" role="alert"></p>
-      <button class="btn" id="open" disabled>${n < 4 ? 'פתחו את הראיה הבאה' : 'פענחו את הראיה האחרונה'}</button></div>
+      <button class="btn" id="open">${n < 4 ? 'פתחו את הראיה הבאה' : 'פענחו את הראיה האחרונה'}</button></div>
       <button class="hintbtn" id="hint">${ART.ui.hint}מעטפת רמז</button>`;
   }
   function readCode(n) {
@@ -454,21 +451,7 @@
     return $('#code').value;
   }
   function bindTask(n) {
-    const st = S.stations[n], br = $('#bridge'), need = $('#need'), open = $('#open');
-    const fields = n === 2 ? [] : $$('#codebox input'); // בעמדה 2 המשבצות הן גם אזור העבודה, אז רק הכפתור ננעל
-    const gate = () => {
-      const left = C.BRIDGE_MIN - br.value.trim().length, ok = left <= 0;
-      need.innerHTML = ok ? `${ART.ui.check}המנעול פתוח להקלדה` : `${ART.ui.lock}עוד ${left} תווים כדי לפתוח את מנעול הקוד`;
-      need.classList.toggle('ok', ok);
-      $('#lock-ico').innerHTML = ok ? ART.ui.unlock : ART.ui.lock;
-      setStep(n, ok ? 'code' : br.value.trim() ? 'bridge' : 'task');
-      fields.forEach(f => { f.disabled = !ok; });
-      open.disabled = !ok;
-      $('#codebox').classList.toggle('gated', !ok);
-    };
-    br.oninput = () => { st.bridge = br.value; saveLocal(); gate(); };
-    br.onblur = save;
-    gate();
+    const st = S.stations[n], open = $('#open');
     const submit = () => {
       const raw = readCode(n), norm = raw.replace(/[\s\-–—־_.,]/g, '').toLowerCase();
       if (!norm || open.disabled) return;
@@ -486,6 +469,7 @@
     };
     open.onclick = submit;
     $$('#codebox input, .aa').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); }));
+    $$('#codebox input').forEach(i => i.addEventListener('input', () => setStep(n, 'code')));
     $('#hint').onclick = () => hintModal(n);
   }
   function hintModal(n, auto) {
@@ -766,7 +750,7 @@
 
   function taskScreen(n) {
     const inner = [null, task1, task2, task3, task4][n]();
-    app.innerHTML = `<section class="screen station task s${n}">${stHead(n, 'task')}${inner}${bridgeBlock(n)}${lockBlock(n)}</section>`;
+    app.innerHTML = `<section class="screen station task s${n}">${stHead(n, 'task')}${inner}${lockBlock(n)}</section>`;
     [null, bind1, bind2, bind3, bind4][n]();
     bindTask(n);
   }
@@ -795,9 +779,9 @@
   function verdictScreen() {
     const V = S.verdict;
     const seg = (name, opts) => `<div class="seg" role="radiogroup">${opts.map(o => `<label><input type="radio" name="${name}" value="${o}" ${V[name] === o ? 'checked' : ''}><span>${o}</span></label>`).join('')}</div>`;
-    app.innerHTML = `<section class="screen verdict">
+    app.innerHTML = `<section class="screen verdict">${V.sent ? '' : backRow('חזרה ללוח הראיות')}
       <h1>הראיות שלכם</h1>
-      <div class="evs">${[1, 2, 3, 4].map(n => `<details class="ev"><summary><span class="tagnum">ראיה ${n}</span>${esc(C.stations[n].title)}</summary><p>${esc(fullBridge(n)) || '<i>לא נכתב משפט גשר.</i>'}</p></details>`).join('')}</div>
+      <div class="evs">${[1, 2, 3, 4].map(n => `<details class="ev"><summary><span class="tagnum">ראיה ${n}</span>${esc(C.stations[n].title)}</summary><p>${esc(C.stations[n].summary)}</p></details>`).join('')}</div>
       <form class="paper legal" id="vf" novalidate>
         <h2>פסק הדין של צוות ${esc(S.name)}</h2>
         <fieldset><legend>1. בית הקפה</legend>${seg('cafe', C.verdict.cafe)}<label class="field"><span>כי…</span><textarea id="cafeWhy" rows="2" maxlength="400">${esc(V.cafeWhy)}</textarea></label></fieldset>
@@ -815,6 +799,7 @@
       saveLocal();
     };
     f.addEventListener('input', pull);
+    const back = $('#back'); if (back) back.onclick = () => go('board');
     f.onsubmit = e => {
       e.preventDefault(); pull();
       const err = m => { $('#verr').textContent = m; };

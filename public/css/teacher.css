@@ -77,7 +77,6 @@ tr.gone .tname { opacity: .55; }
 .wcard h2 { display: flex; align-items: center; gap: 10px; font-size: 22px; }
 .wcard h3 { font: 700 13px var(--mono); letter-spacing: .06em; color: var(--teal-d); margin: 14px 0 6px; }
 .wcard .empty { color: #6B7482; }
-.bridges { margin: 0; padding-inline-start: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 16px; }
 .vmini { background: var(--paper); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 16px; }
 .vmini p { margin: 0 0 6px; }
 .wcard .tb { background: var(--night); }
