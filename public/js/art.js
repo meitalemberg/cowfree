@@ -179,6 +179,7 @@
     chev: I('<path d="M6 9.500l6 6 6-6"/>'),
     soundOn: I(speaker + '<path d="M15.500 9a4 4 0 0 1 0 6M18 6.500a7.500 7.500 0 0 1 0 11"/>'),
     soundOff: I(speaker + '<path d="M16 9.500l5 5M21 9.500l-5 5"/>'),
+    reset: I('<path d="M4.500 12a7.500 7.500 0 1 0 2.200-5.300"/><path d="M4.500 4v4.500H9"/>'),
     doc: I('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>'),
     hint: I('<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3.500 7.500L12 13l8.500-5.500"/>'),
     zoom: I('<circle cx="10.500" cy="10.500" r="6"/><path d="M15 15l5 5M8 10.500h5M10.500 8v5"/>'),

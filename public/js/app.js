@@ -97,6 +97,14 @@
     const f = $('button, [tabindex]', el); if (f) f.focus();
     return el;
   }
+  // איפוס: מוחק את ההתקדמות במכשיר וחוזר למסך הפתיחה. בשיעור עם מורה הצוות נכנס מחדש כצוות חדש
+  function resetGame() { const s = S.sound; S = fresh(); S.sound = s; go('join'); }
+  function confirmReset() {
+    const m = modal(`<h2>${ART.ui.reset}לאפס את המשחק?</h2>
+      <p>כל ההתקדמות תימחק: הראיות שפוענחו, הרמזים, התשובות והטיימר. חוזרים למסך הפתיחה.</p>
+      <div class="confirm"><button class="btn ghost" data-close>ביטול</button><button class="btn danger" id="do-reset">איפוס</button></div>`, 'reset');
+    $('#do-reset', m).onclick = () => { m.remove(); resetGame(); };
+  }
   function drops() {
     if (reduced) return;
     const box = $('#drops');
@@ -116,8 +124,10 @@
     if (withTop) {
       top.innerHTML = `<div class="team">${S.icon ? ART.icon(S.icon) : ''}<b>${esc(S.name)}</b><span class="net" id="net" title="אין חיבור לשרת. ההתקדמות נשמרת במכשיר." ${online || !S.code ? 'hidden' : ''}>לא מקוון</span></div>
         <div class="timer" id="timer" role="timer" aria-live="off"></div>
-        <button class="iconbtn" id="snd" aria-pressed="${S.sound}" aria-label="${S.sound ? 'השתקת צלילים' : 'הפעלת צלילים'}">${S.sound ? ART.ui.soundOn : ART.ui.soundOff}</button>`;
+        <button class="iconbtn" id="snd" aria-pressed="${S.sound}" aria-label="${S.sound ? 'השתקת צלילים' : 'הפעלת צלילים'}">${S.sound ? ART.ui.soundOn : ART.ui.soundOff}</button>
+        <button class="iconbtn" id="rst" aria-label="איפוס המשחק">${ART.ui.reset}</button>`;
       $('#snd').onclick = () => { S.sound = !S.sound; saveLocal(); renderChrome(); sfx('lock'); };
+      $('#rst').onclick = confirmReset;
     }
     const withProg = ['board', 'station', 'verdict', 'waiting'].includes(S.screen);
     prog.hidden = !withProg;
@@ -843,7 +853,7 @@
       <h1>התשובה נשלחה. תודה!</h1><p class="lead">התיק של צוות ${esc(S.name)} נסגר.</p>
       ${S.code ? '' : '<button class="btn ghost" id="again">משחק חדש</button>'}</section>`;
     sfx('msg');
-    const a = $('#again'); if (a) a.onclick = () => { const s = S.sound; S = fresh(); S.sound = s; go('join'); };
+    const a = $('#again'); if (a) a.onclick = resetGame;
   }
 
   /* ================= אתחול ================= */
