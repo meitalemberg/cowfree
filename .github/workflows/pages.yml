@@ -1,0 +1,38 @@
+# גרסת תלמיד סטטית ב-GitHub Pages: רק המשחק, בלי מסך מורה ובלי שרת.
+name: Student version (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build student-only site
+        run: |
+          cp -r public _site
+          rm -f _site/teacher.html _site/js/teacher.js _site/css/teacher.css
+          rm -rf _site/vendor
+          sed -i 's|<script src="js/hash.js">|<script>window.COWFREE_SOLO = true;</script>\n<script src="js/hash.js">|' _site/index.html
+          grep -q COWFREE_SOLO _site/index.html
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

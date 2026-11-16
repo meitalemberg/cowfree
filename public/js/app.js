@@ -7,6 +7,8 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const ltr = s => `<bdi dir="ltr" class="mono">${esc(s)}</bdi>`;
   const KEY = 'cowfree.v1';
+  // גרסת תלמיד סטטית (GitHub Pages): בלי שרת ובלי קוד שיעור, תמיד במצב תרגול
+  const SOLO = !!window.COWFREE_SOLO;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const app = $('#app'), top = $('#top'), prog = $('#progress'), layer = $('#layer');
   const sys = document.body.appendChild(Object.assign(document.createElement('div'), { id: 'sys' }));
@@ -33,7 +35,8 @@
       const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (saved && saved.v === 1 && !q.has('reset')) S = saved;
     } catch (e) { /* מצב שמור פגום: מתחילים מחדש */ }
-    if (urlCode && urlCode !== S.code) { S = fresh(); S.prefill = urlCode; }
+    if (SOLO) { S.code = ''; S.prefill = ''; }
+    else if (urlCode && urlCode !== S.code) { S = fresh(); S.prefill = urlCode; }
     if (q.has('reset')) history.replaceState(null, '', location.pathname);
   }
   function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* אחסון מלא או חסום */ } }
@@ -243,14 +246,14 @@
         <label class="field"><span>שם הצוות</span><input id="tname" maxlength="20" autocomplete="off" enterkeyhint="next" value="${esc(S.name)}" placeholder="למשל: בלשי החלבון"></label>
         <fieldset class="icons"><legend>סמל הצוות</legend><div class="iconrow">${C.icons.map(([k, label]) =>
           `<label class="iconpick"><input type="radio" name="icon" value="${k}" ${S.icon === k ? 'checked' : ''}><span>${ART.icon(k)}<small>${label}</small></span></label>`).join('')}</div></fieldset>
-        <label class="field"><span>קוד שיעור <small>(4 ספרות מהלוח)</small></span><input id="tcode" class="mono" dir="ltr" inputmode="numeric" maxlength="4" autocomplete="off" value="${esc(S.prefill)}" placeholder="• • • •"></label>
-        <p class="fine">בלי קוד שיעור המשחק רץ במצב תרגול, בלי מסך מורה.</p>
+        ${SOLO ? '' : `<label class="field"><span>קוד שיעור <small>(4 ספרות מהלוח)</small></span><input id="tcode" class="mono" dir="ltr" inputmode="numeric" maxlength="4" autocomplete="off" value="${esc(S.prefill)}" placeholder="• • • •"></label>
+        <p class="fine">בלי קוד שיעור המשחק רץ במצב תרגול, בלי מסך מורה.</p>`}
         <p class="err" id="jerr" role="alert"></p>
         <button class="btn" type="submit">נכנסים למעבדה${ART.ui.next}</button>
       </form></section>`;
     $('#jf').onsubmit = async e => {
       e.preventDefault();
-      const name = $('#tname').value.trim(), icon = ($('input[name=icon]:checked') || {}).value, code = $('#tcode').value.replace(/\D/g, '');
+      const name = $('#tname').value.trim(), icon = ($('input[name=icon]:checked') || {}).value, code = SOLO ? '' : $('#tcode').value.replace(/\D/g, '');
       const err = m => { $('#jerr').textContent = m; };
       if (name.length < 2) return err('כתבו שם צוות (לפחות 2 תווים).');
       if (!icon) return err('בחרו סמל לצוות.');
